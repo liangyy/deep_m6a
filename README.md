@@ -4,9 +4,9 @@ Build predictive model on m6a mark.
 
 ## Structure
 
-Codes go here `code/`
-Documentations go here `docs`
-Data goes here `data/`
+* Codes are at `code/`
+* Documentations are at `docs/`
+* Data are at `data/`
 
 ## Pipeline
 
