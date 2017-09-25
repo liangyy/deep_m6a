@@ -14,13 +14,13 @@ rule annotate:
         temp('temp/{region}__{peak}.bed.gz')
     shell:
         '''bedtools intersect -a {input.peak} \
-        -b (zcat {input.region}) \
-        -wo -split -s | \
+        -b <(zcat {input.region}) \
+        -wo -split -s -nonamecheck | \
         gzip > {output[0]}'''
 
 rule summarize:
     input:
-        peak = lambda wildcards: config['peaks'][wildcards.peak]
+        peak = lambda wildcards: config['peaks'][wildcards.peak],
         annotations = lambda wildcards: get_all_annotations(config['regions'], wildcards.peak)
     output:
         'summary/{peak}.tab.gz'

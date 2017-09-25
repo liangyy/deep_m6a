@@ -1,7 +1,7 @@
 peaks:
-  test: '../test/test_peak.bed'
+  test: '../../test/test_peak.bed'
 regions:
-  exon: '../data/gene_annotation/hg38.exon.gff3.gz'
-  CDS: '../data/gene_annotation/hg38.CDS.gff3.gz'
-  five_prime_UTR: '../data/gene_annotation/hg38.five_prime_UTR.gff3.gz'
-  three_prime_UTR: '../data/gene_annotation/hg38.three_prime_UTR.gff3.gz'
+  exon: '../../data/gene_annotation/hg38.exon.gff3.gz'
+  CDS: '../../data/gene_annotation/hg38.CDS.gff3.gz'
+  five_prime_UTR: '../../data/gene_annotation/hg38.five_prime_UTR.gff3.gz'
+  three_prime_UTR: '../../data/gene_annotation/hg38.three_prime_UTR.gff3.gz'
