@@ -2,6 +2,19 @@
 # transcript region ( 5'UTR + CDS + 3'UTR ). The module will intersect peak with exon,
 # UTRs, and CDS to see where do thses peaks locate in transcript.
 
+def get_all_annotations(regions_dic, peak):
+    out = []
+    for r in regions.keys():
+        append('temp/{region}__{peak}.bed.gz'.format(region = r, peak = peak))
+    return
+
+def get_all_annotations_str(regions_dic, peak):
+    annotations = get_all_annotations(regions_dic, peak)
+    return ','.join(annotations)
+
+def get_all_annotation_names_str(regions_dic):
+    return ','.join(regions_dic.keys())
+
 rule all:
     input:
         # somthing here
@@ -14,17 +27,21 @@ rule annotate:
         temp('temp/{region}__{peak}.bed.gz')
     shell:
         '''bedtools intersect -a {input.peak} \
-        -b <(zcat {input.region}) \
-        -wo -split -s -nonamecheck | \
+        -b (zcat {input.region}) \
+        -wo -split -s | \
         gzip > {output[0]}'''
 
 rule summarize:
     input:
         peak = lambda wildcards: config['peaks'][wildcards.peak],
         annotations = lambda wildcards: get_all_annotations(config['regions'], wildcards.peak)
+    params:
+        annotations_str = lambda wildcards: get_all_annotations_str(config['regions'], wildcards.peak),
+        annotation_names_str = lambda wildcards: get_all_annotation_names_str(config['regions'])
     output:
         'summary/{peak}.tab.gz'
     shell:
         '''Rscript ../code/scripts/summarizeAnnotations.R --peak {input.peak} \
-        --annotations {input.annotations} \
+        --annotations {params.annotations_str} \
+        --annotation_names {params.annotation_names_str} \
         --output {output[0]}'''
