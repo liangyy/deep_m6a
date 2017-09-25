@@ -4,9 +4,9 @@
 
 def get_all_annotations(regions_dic, peak):
     out = []
-    for r in regions.keys():
-        append('temp/{region}__{peak}.bed.gz'.format(region = r, peak = peak))
-    return
+    for r in regions_dic.keys():
+        out.append('temp/{region}__{peak}.bed.gz'.format(region = r, peak = peak))
+    return out
 
 def get_all_annotations_str(regions_dic, peak):
     annotations = get_all_annotations(regions_dic, peak)
@@ -27,7 +27,7 @@ rule annotate:
         temp('temp/{region}__{peak}.bed.gz')
     shell:
         '''bedtools intersect -a {input.peak} \
-        -b (zcat {input.region}) \
+        -b <(zcat {input.region}) \
         -wo -split -s | \
         gzip > {output[0]}'''
 
@@ -37,11 +37,12 @@ rule summarize:
         annotations = lambda wildcards: get_all_annotations(config['regions'], wildcards.peak)
     params:
         annotations_str = lambda wildcards: get_all_annotations_str(config['regions'], wildcards.peak),
-        annotation_names_str = lambda wildcards: get_all_annotation_names_str(config['regions'])
+        annotation_names_str = get_all_annotation_names_str(config['regions'])
     output:
         'summary/{peak}.tab.gz'
     shell:
-        '''Rscript ../code/scripts/summarizeAnnotations.R --peak {input.peak} \
+        '''Rscript ../../code/scripts/summarizeAnnotations.R --peak {input.peak} \
         --annotations {params.annotations_str} \
         --annotation_names {params.annotation_names_str} \
         --output {output[0]}'''
+

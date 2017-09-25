@@ -67,7 +67,7 @@ for(i in 1 : length(annotation.in)) {
   peak[ anno.idx, anno.colname] <- anno$size
 }
 
-gz <- gzfile(opt$output, '')
+gz <- gzfile(opt$output, 'w')
 write.table(x = peak, file = gz, 
             col.names = T, row.names = F, quote = F, sep = '\t')
 close(gz)
