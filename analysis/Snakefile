@@ -1,0 +1,30 @@
+# This module analyzes the annotation type of the peak set. Ideally, peaks should locate in
+# transcript region ( 5'UTR + CDS + 3'UTR ). The module will intersect peak with exon,
+# UTRs, and CDS to see where do thses peaks locate in transcript.
+
+rule all:
+    input:
+        # somthing here
+
+rule annotate:
+    input:
+        peak = lambda wildcards: config['peaks'][wildcards.peak],
+        region = lambda wildcards: config['regions'][wildcards.region]
+    output:
+        temp('temp/{region}__{peak}.bed.gz')
+    shell:
+        '''bedtools intersect -a {input.peak} \
+        -b (zcat {input.region}) \
+        -wo -split -s | \
+        gzip > {output[0]}'''
+
+rule summarize:
+    input:
+        peak = lambda wildcards: config['peaks'][wildcards.peak]
+        annotations = lambda wildcards: get_all_annotations(config['regions'], wildcards.peak)
+    output:
+        'summary/{peak}.tab.gz'
+    shell:
+        '''Rscript ../code/scripts/summarizeAnnotations.R --peak {input.peak} \
+        --annotations {input.annotations} \
+        --output {output[0]}'''
