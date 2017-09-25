@@ -19,4 +19,5 @@ awk -F"\\t" '{{if (${icol} == "{string}") print $0;}}' \
             icol = args.icol,
             string = args.string,
             read = args.read_method)
+print(cmd)
 os.system(cmd)

@@ -1,0 +1,5 @@
+# This module analyzes the annotation type of the peak set. Ideally, peaks should locate in
+# transcript region ( 5'UTR + CDS + 3'UTR ). The module will intersect peak with exon,
+# UTRs, and CDS to see where do thses peaks locate in transcript.
+
+
