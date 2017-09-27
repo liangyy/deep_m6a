@@ -62,7 +62,7 @@ peak$size <- sapply(as.character(peak$V11), computeSize)
 for(i in 1 : length(annotation.in)) {
   anno <- read.table(annotation.in[i], sep = '\t', header = F)
   anno$transcript_id <- str_match(anno$V21, 
-                                  pattern = 'gene_id [a-zA-Z0-9-]+; transcript_id ([A-Z_0-9-.]+); exon_number')[, 2]
+                                  pattern = 'gene_id [a-zA-Z0-9-_.]+; transcript_id ([A-Z_0-9-._]+); exon_number')[, 2]
   anno <- buildMatchID(anno)
   anno <- buildPeakID(anno)
   anno <- anno %>%
