@@ -4,11 +4,17 @@
 
 library(optparse)
 library(dplyr)
+library(stringr)
 
 # functions
-buildID <- function(data.tb) {
+buildPeakID <- function(data.tb) {
   data.tb <- data.tb %>% 
-    mutate(id = paste(V1, V2, V3, V4, V10, V11, V12))
+    mutate(peak.id = paste(V1, V2, V3, V4, V10, V11, V12))
+  return(data.tb)
+}
+buildMatchID <- function(data.tb) {
+  data.tb <- data.tb %>% 
+    mutate(match.id = paste(V1, V2, V3, V4, V10, V11, V12, transcript_id))
   return(data.tb)
 }
 splitByComma <- function(string) {
@@ -47,17 +53,27 @@ if(is.character(annotation.name.in)) {
 stopifnot(length(annotation.in) == length(annotation.name.in))
 
 peak <- read.table(peak.in, header = F, sep = '\t', skip = 1)
-peak <- buildID(peak)
+peak <- buildPeakID(peak)
 peak$size <- sapply(as.character(peak$V11), computeSize)
+
+
 
 
 for(i in 1 : length(annotation.in)) {
   anno <- read.table(annotation.in[i], sep = '\t', header = F)
-  anno <- buildID(anno)
+  anno$transcript_id <- str_match(anno$V21, 
+                                  pattern = 'gene_id [a-zA-Z0-9]+; transcript_id ([A-Z]+_[0-9]+); exon_number')[, 2]
+  anno <- buildMatchID(anno)
+  anno <- buildPeakID(anno)
   anno <- anno %>%
-    group_by(id) %>%
-    summarise(size = max(V22))
-  anno.idx <- match(anno$id, peak$id)
+    group_by(match.id, peak.id) %>%
+    summarise(match.size = sum(V22)) %>%
+    ungroup()
+  anno <- anno %>%
+    group_by(peak.id) %>%
+    summarise(size = max(match.size)) %>%
+    ungroup()
+  anno.idx <- match(anno$peak.id, peak$peak.id)
   if(is.null(annotation.name.in)) {
     anno.colname <- annotation.in[i]
   } else {
