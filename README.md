@@ -5,8 +5,9 @@ Build predictive model on m6a mark.
 ## Structure
 
 * Codes are at `code/`
-* Documentations are at `docs/`
+* Documentations are at `docs/` (rmarkdowns are at `rmd/`)
 * Data are at `data/`
+* Analysis modules are at `analysis/`
 
 ## Pipeline
 
