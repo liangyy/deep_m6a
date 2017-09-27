@@ -5,8 +5,9 @@ Build predictive model on m6a mark.
 ## Structure
 
 * Codes are at `code/`
-* Documentations are at `docs/`
+* Documentations are at `docs/` (rmarkdowns are at `rmd/`)
 * Data are at `data/`
+* Analysis modules are at `analysis/`
 
 ## Pipeline
 
@@ -14,14 +15,14 @@ The very raw data is in BED12 format. The major output should be predictive mode
 
 * Pipeline
 
-	1. Annotate every row (signal/peak) BED12 file with corresponding transcript type (5'UTR/coding region/3'UTR).
-	2. Construct negative peak set with the matched transcript types.  **This is not urgent**
-	3. Extend/Shrink the peak according to window size setup.
-	4. Extract sequence from window.
-	5. Build model
+	- [x] Annotate every row (signal/peak) BED12 file with corresponding transcript type (5'UTR/coding region/3'UTR).  
+	- [ ] Construct negative peak set with the matched transcript types.  **This is not urgent**
+	- [ ] Extend/Shrink the peak according to window size setup.
+	- [ ] Extract sequence from window.
+	- [ ] Build model
 
 * Function
 	
-	1. Predict
-	2. Compare different peak set (size? fraction of overlap?)
+	- [ ] Predict
+	- [ ] Compare different peak set (size? fraction of overlap?)
 
