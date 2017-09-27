@@ -1,0 +1,19 @@
+name: "deep_m6a"
+output_dir: "../docs"
+include: [".nojekyll"]
+exclude: ["include"]
+navbar:
+  title: "Deep M6A"
+  left:
+    - text: "Results"
+      href: index.html
+  right:
+    - icon: fa-github
+      href: https://github.com/liangyy/deep_m6a
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: cosmo
+    highlight: textmate

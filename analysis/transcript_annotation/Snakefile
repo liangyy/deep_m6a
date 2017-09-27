@@ -46,3 +46,74 @@ rule summarize:
         --annotation_names {params.annotation_names_str} \
         --output {output[0]}'''
 
+rule generate_report_rmd:
+    input:
+        'summary/{peak}.tab.gz'
+    output:
+        '../../rmd/transcript_annotation.{peak}.Rmd'
+    run:
+        rmd = '''---
+title: "Annotating {peak_name}"
+author: Yanyu Liang
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+---
+
+# Dependencies
+
+```{{r}}
+library(ggplot2)
+library(dplyr)
+```
+
+# Load Data
+
+```
+mydat <- read.table('../analysis/transcript_annotation/{input}',
+                    sep = '\t',
+                    header = T)
+```
+
+# Do they locate in exon?
+
+```{{r}}
+ggplot(mydat) + geom_point(aes(x = size, y = exon)) +
+  geom_abline(slope = 1, intercept = 0) +
+  ggtitle('Peak size versus the size of annotated exon')
+```
+
+# Are they protein coding genes (PCGs)?
+
+```{{r}}
+ggplot(mydat) +
+  geom_point(aes(x = exon, y = CDS + five_prime_UTR + three_prime_UTR)) + geom_abline(slope = 1, intercept = 0) +
+  ggtitle('Annotated exon versus CDS + UTRs') + labs(y = 'CDS + UTRs')
+```
+
+# Where do PCG peaks locate?
+
+```{{r}}
+mydat.pcg <- mydat %>%
+  filter(CDS + three_prime_UTR + five_prime_UTR != 0)
+ggplot(mydat.pcg) +
+  geom_point(aes(x = five_prime_UTR / size, y = three_prime_UTR / size, color = CDS / size > 0.75)) +
+  # scale_color_gradient2(low = 'blue', mid = 'white', high = 'red', midpoint = 0.75,  limits=c(0, 1)) +
+  ggtitle('Fraction of UTRs/CDS in PCG peaks') +
+  labs(x = 'Fraction of 5\'UTR', y = 'Fraction of 3\'UTR', color = 'CDS % > 0.75') +
+  annotate("rect", xmin = 0.75, xmax = 1, ymin = 0, ymax = 0.1,
+  alpha = .2) +
+  annotate("rect", xmin = 0, xmax = 0.1, ymin = 0.75, ymax = 1,
+  alpha = .2)
+```
+'''.format(input = input[0],
+            peak_name = wildcards.peak)
+        o = open(output[0], 'w')
+        o.write(rmd)
+        o.close()
+
+rule generate_report_html:
+    input:
+        '../../rmd/transcript_annotation.{peak}.Rmd'
+    output:
+        '../../rmd/transcript_annotation.{peak}.html'
+    shell:
+        '''Rscript -e "rmarkdown::render_site('./{input[0]}')"'''
