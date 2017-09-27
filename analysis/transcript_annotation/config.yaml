@@ -2,7 +2,7 @@ peaks:
   test: '../../test/test_peak.bed'
   metApeakFisher_joint_peaks_18lcls: '/project2/xinhe/m6A/m6A_seq/m6A_peaks/m6A_QTL/peaks/metApeakFisher_joint_peaks_18lcls/metApeak.bed' 
 regions:
-  exon: '../../data/gene_annotation/hg38.exon.gff3.gz'
-  CDS: '../../data/gene_annotation/hg38.CDS.gff3.gz'
-  five_prime_UTR: '../../data/gene_annotation/hg38.five_prime_UTR.gff3.gz'
-  three_prime_UTR: '../../data/gene_annotation/hg38.three_prime_UTR.gff3.gz'
+  exon: '../../data/gene_annotation/hg38.exon.gtf.gz'
+  CDS: '../../data/gene_annotation/hg38.CDS.gtf.gz'
+  fiveUTR: '../../data/gene_annotation/hg38.5UTR.gtf.gz'
+  threeUTR: '../../data/gene_annotation/hg38.3UTR.gtf.gz'

@@ -331,16 +331,16 @@ library(dplyr)</code></pre>
 <div id="are-they-protein-coding-genes-pcgs" class="section level1">
 <h1><span class="header-section-number">4</span> Are they protein coding genes (PCGs)?</h1>
 <pre class="r"><code>ggplot(mydat) +
-  geom_point(aes(x = exon, y = CDS + five_prime_UTR + three_prime_UTR)) + geom_abline(slope = 1, intercept = 0) +
+  geom_point(aes(x = exon, y = CDS + fiveUTR + threeUTR)) + geom_abline(slope = 1, intercept = 0) +
   ggtitle(&#39;Annotated exon versus CDS + UTRs&#39;) + labs(y = &#39;CDS + UTRs&#39;)</code></pre>
 <p><img src="transcript_annotation.metApeakFisher_joint_peaks_18lcls_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 </div>
 <div id="where-do-pcg-peaks-locate" class="section level1">
 <h1><span class="header-section-number">5</span> Where do PCG peaks locate?</h1>
 <pre class="r"><code>mydat.pcg &lt;- mydat %&gt;%
-  filter(CDS + three_prime_UTR + five_prime_UTR != 0)
+  filter(CDS + threeUTR + fiveUTR != 0)
 ggplot(mydat.pcg) +
-  geom_point(aes(x = five_prime_UTR / size, y = three_prime_UTR / size, color = CDS / size &gt; 0.75)) +
+  geom_point(aes(x = fiveUTR / size, y = threeUTR / size, color = CDS / size &gt; 0.75)) +
   # scale_color_gradient2(low = &#39;blue&#39;, mid = &#39;white&#39;, high = &#39;red&#39;, midpoint = 0.75,  limits=c(0, 1)) +
   ggtitle(&#39;Fraction of UTRs/CDS in PCG peaks&#39;) +
   labs(x = &#39;Fraction of 5\&#39;UTR&#39;, y = &#39;Fraction of 3\&#39;UTR&#39;, color = &#39;CDS % &gt; 0.75&#39;) +

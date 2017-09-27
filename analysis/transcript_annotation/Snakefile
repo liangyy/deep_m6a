@@ -91,7 +91,7 @@ ggplot(mydat) + geom_point(aes(x = size, y = exon)) +
 
 ```{{r}}
 ggplot(mydat) +
-  geom_point(aes(x = exon, y = CDS + five_prime_UTR + three_prime_UTR)) + geom_abline(slope = 1, intercept = 0) +
+  geom_point(aes(x = exon, y = CDS + fiveUTR + threeUTR)) + geom_abline(slope = 1, intercept = 0) +
   ggtitle('Annotated exon versus CDS + UTRs') + labs(y = 'CDS + UTRs')
 ```
 
@@ -99,9 +99,9 @@ ggplot(mydat) +
 
 ```{{r}}
 mydat.pcg <- mydat %>%
-  filter(CDS + three_prime_UTR + five_prime_UTR != 0)
+  filter(CDS + threeUTR + fiveUTR != 0)
 ggplot(mydat.pcg) +
-  geom_point(aes(x = five_prime_UTR / size, y = three_prime_UTR / size, color = CDS / size > 0.75)) +
+  geom_point(aes(x = fiveUTR / size, y = threeUTR / size, color = CDS / size > 0.75)) +
   # scale_color_gradient2(low = 'blue', mid = 'white', high = 'red', midpoint = 0.75,  limits=c(0, 1)) +
   ggtitle('Fraction of UTRs/CDS in PCG peaks') +
   labs(x = 'Fraction of 5\\'UTR', y = 'Fraction of 3\\'UTR', color = 'CDS % > 0.75') +
