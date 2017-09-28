@@ -328,7 +328,7 @@ library(dplyr)</code></pre>
 if(length(unique(mydat.valid$peak.id)) != length(unique(mydat$peak.id)))  {  # To check if all peak locate in at least one transcript
   print(&#39;warning: Some peaks do NOT locate comppletely in transcript. They are: &#39;)
   peaks.all &lt;- unique(mydat.valid$peak.id)
-  print(peaks.all[!peaks.all %in% mydat.valid$peak.id])
+  print(peaks.all[!peaks.all %in% mydat$peak.id])
 }   </code></pre>
 <pre><code>## [1] &quot;warning: Some peaks do NOT locate comppletely in transcript. They are: &quot;
 ## factor(0)

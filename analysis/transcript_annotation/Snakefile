@@ -88,7 +88,7 @@ mydat.valid <- mydat[mydat$size == mydat$exon, ]
 if(length(unique(mydat.valid$peak.id)) != length(unique(mydat$peak.id)))  {{  # To check if all peak locate in at least one transcript
   print('warning: Some peaks do NOT locate comppletely in transcript. They are: ')
   peaks.all <- unique(mydat.valid$peak.id)
-  print(peaks.all[!peaks.all %in% mydat.valid$peak.id])
+  print(peaks.all[!peaks.all %in% mydat$peak.id])
 }}   
 ```
 
