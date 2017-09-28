@@ -86,7 +86,8 @@ anno <- anno %>%
 anno.colname <- getColname(annotation.name.in, i)
 anno <- changeColname(anno, 'match.size', anno.colname)
 peak <- inner_join(peak, anno, by = 'peak.id')
-
+# print(peak)
+# print('-----')
 
 for(i in 2 : length(annotation.in)) {
   anno.colname <- getColname(annotation.name.in, i)
@@ -95,14 +96,20 @@ for(i in 2 : length(annotation.in)) {
                                   pattern = 'gene_id [a-zA-Z0-9-_.]+; transcript_id ([A-Z_0-9-._]+); exon_number')[, 2]
   anno <- buildMatchID(anno)
   anno <- buildPeakID(anno)
-  stopifnot(sum(!(anno$match.id %in% peak$match.id)) == 0)
+  if(sum(!(anno$match.id %in% peak$match.id)) != 0) {
+    print(anno$match.id[anno$match.id %in% peak$match.id])
+  }
+#   stopifnot(sum(!(anno$match.id %in% peak$match.id)) == 0)
   anno <- anno %>%
     group_by(match.id, peak.id) %>%
     summarise(match.size = sum(V22)) %>%
     ungroup() %>%
     select(match.id, match.size) 
   anno <- changeColname(anno, 'match.size', anno.colname)
-  peak <- inner_join(peak, anno, by = 'match.id')
+  peak <- left_join(peak, anno, by = 'match.id')
+  peak[is.na(peak)] <- 0
+#   print(peak)
+#   print('-----')
 }
 
 gz <- gzfile(opt$output, 'w')
