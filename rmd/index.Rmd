@@ -7,9 +7,11 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 # Peak sets
 
   * Test set
+  * metApeakFisher_joint_peaks_18lcls
 
 # Annotating peaks
 
 Peaks are annotated according to its function in transcript (5'UTR - CDS - 3'UTR).
 
   * [Test set](transcript_annotation.test.html)
+  * [metApeakFisher_joint_peaks_18lcls](transcript_annotation.metApeakFisher_joint_peaks_18lcls.html)
