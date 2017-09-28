@@ -321,23 +321,43 @@ library(dplyr)</code></pre>
                     sep = &#39;\t&#39;,
                     header = T)</code></pre>
 </div>
-<div id="do-they-locate-in-exon" class="section level1">
-<h1><span class="header-section-number">3</span> Do they locate in exon?</h1>
-<pre class="r"><code>ggplot(mydat) + geom_point(aes(x = size, y = exon)) +
-  geom_abline(slope = 1, intercept = 0) +
-  ggtitle(&#39;Peak size versus the size of annotated exon&#39;)</code></pre>
-<p><img src="transcript_annotation.metApeakFisher_joint_peaks_18lcls_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<div id="extract-valid-transcript-hit" class="section level1">
+<h1><span class="header-section-number">3</span> Extract valid transcript hit</h1>
+<p>This is defined as the peak-transcript hit in which the peak locates completely in the transcript (namely exon).</p>
+<pre class="r"><code>mydat.valid &lt;- mydat[mydat$size == mydat$exon, ]
+if(length(unique(mydat.valid$peak.id)) != length(unique(mydat$peak.id)))  {  # To check if all peak locate in at least one transcript
+  print(&#39;warning: Some peaks do NOT locate comppletely in transcript. They are: &#39;)
+  peaks.all &lt;- unique(mydat.valid$peak.id)
+  print(peaks.all[!peaks.all %in% mydat.valid$peak.id])
+}   </code></pre>
+<pre><code>## [1] &quot;warning: Some peaks do NOT locate comppletely in transcript. They are: &quot;
+## factor(0)
+## 18567 Levels: chr1 100038232 100049974 HIAT1 2 84,66, 0,11676 ...</code></pre>
 </div>
-<div id="are-they-protein-coding-genes-pcgs" class="section level1">
-<h1><span class="header-section-number">4</span> Are they protein coding genes (PCGs)?</h1>
-<pre class="r"><code>ggplot(mydat) +
-  geom_point(aes(x = exon, y = CDS + fiveUTR + threeUTR)) + geom_abline(slope = 1, intercept = 0) +
-  ggtitle(&#39;Annotated exon versus CDS + UTRs&#39;) + labs(y = &#39;CDS + UTRs&#39;)</code></pre>
+<div id="number-of-valid-transcripts-per-peak" class="section level1">
+<h1><span class="header-section-number">4</span> Number of valid transcripts per peak</h1>
+<pre class="r"><code>hit &lt;- mydat.valid$peak.id
+valid.count &lt;- data.frame(table(hit))
+ggplot(valid.count) + geom_histogram(aes(x = Freq), binwidth = 1) + ggtitle(&#39;# of valid transcript per peak&#39;)</code></pre>
 <p><img src="transcript_annotation.metApeakFisher_joint_peaks_18lcls_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 </div>
+<div id="do-they-locate-in-exon" class="section level1">
+<h1><span class="header-section-number">5</span> Do they locate in exon?</h1>
+<pre class="r"><code>ggplot(mydat.valid) + geom_point(aes(x = size, y = exon)) +
+  geom_abline(slope = 1, intercept = 0) +
+  ggtitle(&#39;Peak size versus the size of annotated exon&#39;)</code></pre>
+<p><img src="transcript_annotation.metApeakFisher_joint_peaks_18lcls_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+<div id="are-they-protein-coding-genes-pcgs" class="section level1">
+<h1><span class="header-section-number">6</span> Are they protein coding genes (PCGs)?</h1>
+<pre class="r"><code>ggplot(mydat.valid) +
+  geom_point(aes(x = exon, y = CDS + fiveUTR + threeUTR)) + geom_abline(slope = 1, intercept = 0) +
+  ggtitle(&#39;Annotated exon versus CDS + UTRs&#39;) + labs(y = &#39;CDS + UTRs&#39;)</code></pre>
+<p><img src="transcript_annotation.metApeakFisher_joint_peaks_18lcls_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
 <div id="where-do-pcg-peaks-locate" class="section level1">
-<h1><span class="header-section-number">5</span> Where do PCG peaks locate?</h1>
-<pre class="r"><code>mydat.pcg &lt;- mydat %&gt;%
+<h1><span class="header-section-number">7</span> Where do PCG peaks locate?</h1>
+<pre class="r"><code>mydat.pcg &lt;- mydat.valid %&gt;%
   filter(CDS + threeUTR + fiveUTR != 0)
 ggplot(mydat.pcg) +
   geom_point(aes(x = fiveUTR / size, y = threeUTR / size, color = CDS / size &gt; 0.75)) +
@@ -348,7 +368,7 @@ ggplot(mydat.pcg) +
   alpha = .2) +
   annotate(&quot;rect&quot;, xmin = 0, xmax = 0.1, ymin = 0.75, ymax = 1,
   alpha = .2)</code></pre>
-<p><img src="transcript_annotation.metApeakFisher_joint_peaks_18lcls_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><img src="transcript_annotation.metApeakFisher_joint_peaks_18lcls_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 </div>
 
 

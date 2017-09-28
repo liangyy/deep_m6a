@@ -19,10 +19,31 @@ mydat <- read.table('../analysis/transcript_annotation/summary/metApeakFisher_jo
                     header = T)
 ```
 
+# Extract valid transcript hit
+
+This is defined as the peak-transcript hit in which the peak locates completely in the transcript (namely exon).
+
+```{r}
+mydat.valid <- mydat[mydat$size == mydat$exon, ]
+if(length(unique(mydat.valid$peak.id)) != length(unique(mydat$peak.id)))  {  # To check if all peak locate in at least one transcript
+  print('warning: Some peaks do NOT locate comppletely in transcript. They are: ')
+  peaks.all <- unique(mydat.valid$peak.id)
+  print(peaks.all[!peaks.all %in% mydat.valid$peak.id])
+}   
+```
+
+# Number of valid transcripts per peak
+
+```{r}
+hit <- mydat.valid$peak.id
+valid.count <- data.frame(table(hit))
+ggplot(valid.count) + geom_histogram(aes(x = Freq), binwidth = 1) + ggtitle('# of valid transcript per peak')
+```
+
 # Do they locate in exon?
 
 ```{r}
-ggplot(mydat) + geom_point(aes(x = size, y = exon)) +
+ggplot(mydat.valid) + geom_point(aes(x = size, y = exon)) +
   geom_abline(slope = 1, intercept = 0) +
   ggtitle('Peak size versus the size of annotated exon')
 ```
@@ -30,7 +51,7 @@ ggplot(mydat) + geom_point(aes(x = size, y = exon)) +
 # Are they protein coding genes (PCGs)?
 
 ```{r}
-ggplot(mydat) +
+ggplot(mydat.valid) +
   geom_point(aes(x = exon, y = CDS + fiveUTR + threeUTR)) + geom_abline(slope = 1, intercept = 0) +
   ggtitle('Annotated exon versus CDS + UTRs') + labs(y = 'CDS + UTRs')
 ```
@@ -38,7 +59,7 @@ ggplot(mydat) +
 # Where do PCG peaks locate?
 
 ```{r}
-mydat.pcg <- mydat %>%
+mydat.pcg <- mydat.valid %>%
   filter(CDS + threeUTR + fiveUTR != 0)
 ggplot(mydat.pcg) +
   geom_point(aes(x = fiveUTR / size, y = threeUTR / size, color = CDS / size > 0.75)) +
