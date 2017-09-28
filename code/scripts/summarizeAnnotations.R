@@ -5,6 +5,7 @@
 library(optparse)
 library(dplyr)
 library(stringr)
+library(tidyr)
 
 # functions
 buildPeakID <- function(data.tb) {
@@ -24,6 +25,21 @@ computeSize <- function(string) {
   sizes <- splitByComma(string)
   class(sizes) <- 'numeric'
   return(sum(sizes))
+}
+getColname <- function(annotation.name.in, i) {
+  if(is.null(annotation.name.in)) {
+    anno.colname <- annotation.in[i]
+  } else {
+    anno.colname <- annotation.name.in[i]
+  }
+  return(anno.colname)
+}
+changeColname <- function(df, name.pre, name.new) {
+  df.colnames <- colnames(df)
+  
+  df.colnames[df.colnames == name.pre] <- name.new
+  colnames(df) <- df.colnames
+  return(df)
 }
 
 option_list = list(
@@ -56,31 +72,37 @@ peak <- read.table(peak.in, header = F, sep = '\t', skip = 1)
 peak <- buildPeakID(peak)
 peak$size <- sapply(as.character(peak$V11), computeSize)
 
+# do exon first
+i <- 1
+anno <- read.table(annotation.in[i], sep = '\t', header = F)
+anno$transcript_id <- str_match(anno$V21, 
+                                pattern = 'gene_id [a-zA-Z0-9-_.]+; transcript_id ([A-Z_0-9-._]+); exon_number')[, 2]
+anno <- buildMatchID(anno)
+anno <- buildPeakID(anno)
+anno <- anno %>%
+  group_by(match.id, peak.id, transcript_id) %>%
+  summarise(match.size = sum(V22)) %>%
+  ungroup()
+anno.colname <- getColname(annotation.name.in, i)
+anno <- changeColname(anno, 'match.size', anno.colname)
+peak <- inner_join(peak, anno, by = 'peak.id')
 
 
-
-for(i in 1 : length(annotation.in)) {
+for(i in 2 : length(annotation.in)) {
+  anno.colname <- getColname(annotation.name.in, i)
   anno <- read.table(annotation.in[i], sep = '\t', header = F)
   anno$transcript_id <- str_match(anno$V21, 
                                   pattern = 'gene_id [a-zA-Z0-9-_.]+; transcript_id ([A-Z_0-9-._]+); exon_number')[, 2]
   anno <- buildMatchID(anno)
   anno <- buildPeakID(anno)
+  stopifnot(sum(!(anno$match.id %in% peak$match.id)) == 0)
   anno <- anno %>%
     group_by(match.id, peak.id) %>%
     summarise(match.size = sum(V22)) %>%
-    ungroup()
-  anno <- anno %>%
-    group_by(peak.id) %>%
-    summarise(size = max(match.size)) %>%
-    ungroup()
-  anno.idx <- match(anno$peak.id, peak$peak.id)
-  if(is.null(annotation.name.in)) {
-    anno.colname <- annotation.in[i]
-  } else {
-    anno.colname <- annotation.name.in[i]
-  }
-  peak[[anno.colname]] <- rep(0, nrow(peak))
-  peak[ anno.idx, anno.colname] <- anno$size
+    ungroup() %>%
+    select(match.id, match.size) 
+  anno <- changeColname(anno, 'match.size', anno.colname)
+  peak <- inner_join(peak, anno, by = 'match.id')
 }
 
 gz <- gzfile(opt$output, 'w')
