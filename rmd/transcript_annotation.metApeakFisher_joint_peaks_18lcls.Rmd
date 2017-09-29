@@ -9,6 +9,7 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 ```{r}
 library(ggplot2)
 library(dplyr)
+source('../code/utilities/transcript_annotation_rlib.R')
 ```
 
 # Load Data
@@ -35,25 +36,28 @@ if(length(unique(mydat.valid$peak.id)) != length(unique(mydat$peak.id)))  {  # T
 # Number of valid transcripts per peak
 
 ```{r}
-hit <- mydat.valid$peak.id
-valid.count <- data.frame(table(hit))
+output <- countFreq(mydat.valid)
+mydat.valid.count <- output$df
+valid.count <- output$count
 ggplot(valid.count) + geom_histogram(aes(x = Freq), binwidth = 1) + ggtitle('# of valid transcript per peak') + scale_y_log10()
 ```
 
 # Do they locate in exon?
 
 ```{r}
-ggplot(mydat.valid) + geom_point(aes(x = size, y = exon)) +
+ggplot(mydat.valid.count) + geom_jitter(aes(x = size, y = exon, color = log2.freq), width = 200) +
   geom_abline(slope = 1, intercept = 0) +
-  ggtitle('Peak size versus the size of annotated exon')
+  ggtitle('Peak size versus the size of annotated exon') +
+  scale_color_gradient2(low = 'blue', mid = 'white', high = 'red', midpoint = 2)
 ```
 
 # Are they protein coding genes (PCGs)?
 
 ```{r}
-ggplot(mydat.valid) +
-  geom_point(aes(x = exon, y = CDS + fiveUTR + threeUTR)) + geom_abline(slope = 1, intercept = 0) +
-  ggtitle('Annotated exon versus CDS + UTRs') + labs(y = 'CDS + UTRs')
+ggplot(mydat.valid.count) +
+  geom_jitter(aes(x = exon, y = CDS + fiveUTR + threeUTR, color = log2.freq), width = 200) + geom_abline(slope = 1, intercept = 0) +
+  ggtitle('Annotated exon versus CDS + UTRs') + labs(y = 'CDS + UTRs') +
+  scale_color_gradient2(low = 'blue', mid = 'white', high = 'red', midpoint = 2)
 ```
 
 # Where do PCG peaks locate?
@@ -61,13 +65,43 @@ ggplot(mydat.valid) +
 ```{r}
 mydat.pcg <- mydat.valid %>%
   filter(CDS + threeUTR + fiveUTR != 0)
-ggplot(mydat.pcg) +
-  geom_point(aes(x = fiveUTR / size, y = threeUTR / size, color = CDS / size > 0.75)) +
+output <- countFreq(mydat.pcg)
+mydat.pcg.count <- output$df
+ggplot(mydat.pcg.count) +
+  geom_jitter(aes(x = fiveUTR / size, y = threeUTR / size, color = log2.freq)) +
   # scale_color_gradient2(low = 'blue', mid = 'white', high = 'red', midpoint = 0.75,  limits=c(0, 1)) +
   ggtitle('Fraction of UTRs/CDS in PCG peaks') +
-  labs(x = 'Fraction of 5\'UTR', y = 'Fraction of 3\'UTR', color = 'CDS % > 0.75') +
+  labs(x = 'Fraction of 5\'UTR', y = 'Fraction of 3\'UTR') +
   annotate("rect", xmin = 0.75, xmax = 1, ymin = 0, ymax = 0.1,
   alpha = .2) +
   annotate("rect", xmin = 0, xmax = 0.1, ymin = 0.75, ymax = 1,
   alpha = .2)
+```
+
+# Inconsistency among transcript annotations
+
+```{r}
+mydat.pcg.dist <- mydat.pcg %>% 
+  group_by(peak.id) %>%
+  summarise(distance = sd(fiveUTR/exon) + sd(threeUTR/exon)) %>%
+  ungroup()
+ggplot(mydat.pcg.dist) + 
+  geom_histogram(aes(x = distance)) + 
+  scale_y_log10() + 
+  ggtitle('total deviation of annotation \n in single peak \n within multiple transcripts')
+```
+
+# Stratifying peaks
+
+```{r}
+mydat.valid.stratify <- mydat.valid %>%
+  mutate(type = stratifyMatch(fiveUTR, threeUTR, CDS, exon))
+mydat.valid.stratify.bypeak <- mydat.valid.stratify %>%
+  group_by(peak.id) %>%
+  summarise(peak.type = stratifyPeak(type)) %>%
+  ungroup()
+ggplot(mydat.valid.stratify.bypeak) + 
+  geom_bar(aes(x = peak.type, y = ..count..)) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle('Number of peak per annotation category')
 ```
