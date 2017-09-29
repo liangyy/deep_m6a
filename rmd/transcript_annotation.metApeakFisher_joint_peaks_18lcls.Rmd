@@ -9,6 +9,7 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 ```{r}
 library(ggplot2)
 library(dplyr)
+library(pander)
 source('../code/utilities/transcript_annotation_rlib.R')
 ```
 
@@ -99,11 +100,17 @@ ggplot(mydat.pcg.dist) +
 mydat.valid.stratify <- mydat.valid %>%
   mutate(type = stratifyMatch(fiveUTR, threeUTR, CDS, exon))
 mydat.valid.stratify.bypeak <- mydat.valid.stratify %>%
-  group_by(peak.id) %>%
+  group_by(peak.id, exon) %>%
   summarise(peak.type = stratifyPeak(type)) %>%
   ungroup()
 ggplot(mydat.valid.stratify.bypeak) +
   geom_bar(aes(x = peak.type, y = ..count..)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   ggtitle('Number of peak per annotation category')
+```
+
+# Size of peak
+
+```{r, results='asis'}
+pander(summary(mydat.valid.stratify.bypeak$exon))
 ```
