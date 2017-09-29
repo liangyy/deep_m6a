@@ -314,7 +314,8 @@ library(dplyr)</code></pre>
 <pre><code>## The following objects are masked from &#39;package:base&#39;:
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>source(&#39;../code/utilities/transcript_annotation_rlib.R&#39;)</code></pre>
+<pre class="r"><code>library(pander)
+source(&#39;../code/utilities/transcript_annotation_rlib.R&#39;)</code></pre>
 </div>
 <div id="load-data" class="section level1">
 <h1><span class="header-section-number">2</span> Load Data</h1>
@@ -870,7 +871,7 @@ ggplot(mydat.pcg.dist) +
 <pre class="r"><code>mydat.valid.stratify &lt;- mydat.valid %&gt;%
   mutate(type = stratifyMatch(fiveUTR, threeUTR, CDS, exon))
 mydat.valid.stratify.bypeak &lt;- mydat.valid.stratify %&gt;%
-  group_by(peak.id) %&gt;%
+  group_by(peak.id, exon) %&gt;%
   summarise(peak.type = stratifyPeak(type)) %&gt;%
   ungroup()
 ggplot(mydat.valid.stratify.bypeak) +
@@ -878,6 +879,40 @@ ggplot(mydat.valid.stratify.bypeak) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   ggtitle(&#39;Number of peak per annotation category&#39;)</code></pre>
 <p><img src="transcript_annotation.metApeakFisher_joint_peaks_18lcls_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+</div>
+<div id="size-of-peak" class="section level1">
+<h1><span class="header-section-number">10</span> Size of peak</h1>
+<pre class="r"><code>pander(summary(mydat.valid.stratify.bypeak$exon))</code></pre>
+<table>
+<colgroup>
+<col width="9%" />
+<col width="13%" />
+<col width="12%" />
+<col width="9%" />
+<col width="13%" />
+<col width="8%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">Min.</th>
+<th align="center">1st Qu.</th>
+<th align="center">Median</th>
+<th align="center">Mean</th>
+<th align="center">3rd Qu.</th>
+<th align="center">Max.</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">79</td>
+<td align="center">197</td>
+<td align="center">300</td>
+<td align="center">402.2</td>
+<td align="center">500</td>
+<td align="center">3336</td>
+</tr>
+</tbody>
+</table>
 </div>
 
 
