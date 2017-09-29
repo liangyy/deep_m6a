@@ -30,7 +30,7 @@ if(length(unique(mydat.valid$peak.id)) != length(unique(mydat$peak.id)))  {  # T
   print('warning: Some peaks do NOT locate comppletely in transcript. They are: ')
   peaks.all <- unique(mydat$peak.id)
   print(peaks.all[!peaks.all %in% mydat.valid$peak.id])
-}   
+}
 ```
 
 # Number of valid transcripts per peak
@@ -81,14 +81,16 @@ ggplot(mydat.pcg.count) +
 # Inconsistency among transcript annotations
 
 ```{r}
-mydat.pcg.dist <- mydat.pcg %>% 
+mydat.pcg.dist <- mydat.pcg %>%
   group_by(peak.id) %>%
   summarise(distance = sd(fiveUTR/exon) + sd(threeUTR/exon)) %>%
   ungroup()
-ggplot(mydat.pcg.dist) + 
-  geom_histogram(aes(x = distance)) + 
-  scale_y_log10() + 
-  ggtitle('total deviation of annotation \n in single peak \n within multiple transcripts')
+ggplot(mydat.pcg.dist) +
+  geom_histogram(aes(x = distance)) +
+  scale_y_log10() +
+  ggtitle('total deviation of annotation 
+ in single peak 
+ within multiple transcripts')
 ```
 
 # Stratifying peaks
@@ -100,8 +102,8 @@ mydat.valid.stratify.bypeak <- mydat.valid.stratify %>%
   group_by(peak.id) %>%
   summarise(peak.type = stratifyPeak(type)) %>%
   ungroup()
-ggplot(mydat.valid.stratify.bypeak) + 
-  geom_bar(aes(x = peak.type, y = ..count..)) + 
+ggplot(mydat.valid.stratify.bypeak) +
+  geom_bar(aes(x = peak.type, y = ..count..)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   ggtitle('Number of peak per annotation category')
 ```

@@ -297,7 +297,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Annotating metApeakFisher_joint_peaks_18lcls</h1>
 <h4 class="author"><em>Yanyu Liang</em></h4>
-<h4 class="date"><em>27 September, 2017</em></h4>
+<h4 class="date"><em>29 September, 2017</em></h4>
 
 </div>
 
@@ -314,6 +314,7 @@ library(dplyr)</code></pre>
 <pre><code>## The following objects are masked from &#39;package:base&#39;:
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>source(&#39;../code/utilities/transcript_annotation_rlib.R&#39;)</code></pre>
 </div>
 <div id="load-data" class="section level1">
 <h1><span class="header-section-number">2</span> Load Data</h1>
@@ -329,7 +330,7 @@ if(length(unique(mydat.valid$peak.id)) != length(unique(mydat$peak.id)))  {  # T
   print(&#39;warning: Some peaks do NOT locate comppletely in transcript. They are: &#39;)
   peaks.all &lt;- unique(mydat$peak.id)
   print(peaks.all[!peaks.all %in% mydat.valid$peak.id])
-}   </code></pre>
+}</code></pre>
 <pre><code>## [1] &quot;warning: Some peaks do NOT locate comppletely in transcript. They are: &quot;
 ##   [1] chr1 1615464 1615894 MIB2 2 169,30, 0,400                                                                         
 ##   [2] chr1 1616092 1623671 MIB2 3 8,107,283, 0,415,7296                                                                 
@@ -805,8 +806,9 @@ if(length(unique(mydat.valid$peak.id)) != length(unique(mydat$peak.id)))  {  # T
 </div>
 <div id="number-of-valid-transcripts-per-peak" class="section level1">
 <h1><span class="header-section-number">4</span> Number of valid transcripts per peak</h1>
-<pre class="r"><code>hit &lt;- mydat.valid$peak.id
-valid.count &lt;- data.frame(table(hit))
+<pre class="r"><code>output &lt;- countFreq(mydat.valid)
+mydat.valid.count &lt;- output$df
+valid.count &lt;- output$count
 ggplot(valid.count) + geom_histogram(aes(x = Freq), binwidth = 1) + ggtitle(&#39;# of valid transcript per peak&#39;) + scale_y_log10()</code></pre>
 <pre><code>## Warning: Transformation introduced infinite values in continuous y-axis</code></pre>
 <pre><code>## Warning: Removed 30 rows containing missing values (geom_bar).</code></pre>
@@ -814,32 +816,68 @@ ggplot(valid.count) + geom_histogram(aes(x = Freq), binwidth = 1) + ggtitle(&#39
 </div>
 <div id="do-they-locate-in-exon" class="section level1">
 <h1><span class="header-section-number">5</span> Do they locate in exon?</h1>
-<pre class="r"><code>ggplot(mydat.valid) + geom_point(aes(x = size, y = exon)) +
+<pre class="r"><code>ggplot(mydat.valid.count) + geom_jitter(aes(x = size, y = exon, color = log2.freq), width = 200) +
   geom_abline(slope = 1, intercept = 0) +
-  ggtitle(&#39;Peak size versus the size of annotated exon&#39;)</code></pre>
+  ggtitle(&#39;Peak size versus the size of annotated exon&#39;) +
+  scale_color_gradient2(low = &#39;blue&#39;, mid = &#39;white&#39;, high = &#39;red&#39;, midpoint = 2)</code></pre>
 <p><img src="transcript_annotation.metApeakFisher_joint_peaks_18lcls_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 </div>
 <div id="are-they-protein-coding-genes-pcgs" class="section level1">
 <h1><span class="header-section-number">6</span> Are they protein coding genes (PCGs)?</h1>
-<pre class="r"><code>ggplot(mydat.valid) +
-  geom_point(aes(x = exon, y = CDS + fiveUTR + threeUTR)) + geom_abline(slope = 1, intercept = 0) +
-  ggtitle(&#39;Annotated exon versus CDS + UTRs&#39;) + labs(y = &#39;CDS + UTRs&#39;)</code></pre>
+<pre class="r"><code>ggplot(mydat.valid.count) +
+  geom_jitter(aes(x = exon, y = CDS + fiveUTR + threeUTR, color = log2.freq), width = 200) + geom_abline(slope = 1, intercept = 0) +
+  ggtitle(&#39;Annotated exon versus CDS + UTRs&#39;) + labs(y = &#39;CDS + UTRs&#39;) +
+  scale_color_gradient2(low = &#39;blue&#39;, mid = &#39;white&#39;, high = &#39;red&#39;, midpoint = 2)</code></pre>
 <p><img src="transcript_annotation.metApeakFisher_joint_peaks_18lcls_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 </div>
 <div id="where-do-pcg-peaks-locate" class="section level1">
 <h1><span class="header-section-number">7</span> Where do PCG peaks locate?</h1>
 <pre class="r"><code>mydat.pcg &lt;- mydat.valid %&gt;%
   filter(CDS + threeUTR + fiveUTR != 0)
-ggplot(mydat.pcg) +
-  geom_point(aes(x = fiveUTR / size, y = threeUTR / size, color = CDS / size &gt; 0.75)) +
+output &lt;- countFreq(mydat.pcg)
+mydat.pcg.count &lt;- output$df
+ggplot(mydat.pcg.count) +
+  geom_jitter(aes(x = fiveUTR / size, y = threeUTR / size, color = log2.freq)) +
   # scale_color_gradient2(low = &#39;blue&#39;, mid = &#39;white&#39;, high = &#39;red&#39;, midpoint = 0.75,  limits=c(0, 1)) +
   ggtitle(&#39;Fraction of UTRs/CDS in PCG peaks&#39;) +
-  labs(x = &#39;Fraction of 5\&#39;UTR&#39;, y = &#39;Fraction of 3\&#39;UTR&#39;, color = &#39;CDS % &gt; 0.75&#39;) +
+  labs(x = &#39;Fraction of 5\&#39;UTR&#39;, y = &#39;Fraction of 3\&#39;UTR&#39;) +
   annotate(&quot;rect&quot;, xmin = 0.75, xmax = 1, ymin = 0, ymax = 0.1,
   alpha = .2) +
   annotate(&quot;rect&quot;, xmin = 0, xmax = 0.1, ymin = 0.75, ymax = 1,
   alpha = .2)</code></pre>
 <p><img src="transcript_annotation.metApeakFisher_joint_peaks_18lcls_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="inconsistency-among-transcript-annotations" class="section level1">
+<h1><span class="header-section-number">8</span> Inconsistency among transcript annotations</h1>
+<pre class="r"><code>mydat.pcg.dist &lt;- mydat.pcg %&gt;%
+  group_by(peak.id) %&gt;%
+  summarise(distance = sd(fiveUTR/exon) + sd(threeUTR/exon)) %&gt;%
+  ungroup()
+ggplot(mydat.pcg.dist) +
+  geom_histogram(aes(x = distance)) +
+  scale_y_log10() +
+  ggtitle(&#39;total deviation of annotation 
+ in single peak 
+ within multiple transcripts&#39;)</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<pre><code>## Warning: Removed 8146 rows containing non-finite values (stat_bin).</code></pre>
+<pre><code>## Warning: Transformation introduced infinite values in continuous y-axis</code></pre>
+<pre><code>## Warning: Removed 6 rows containing missing values (geom_bar).</code></pre>
+<p><img src="transcript_annotation.metApeakFisher_joint_peaks_18lcls_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+</div>
+<div id="stratifying-peaks" class="section level1">
+<h1><span class="header-section-number">9</span> Stratifying peaks</h1>
+<pre class="r"><code>mydat.valid.stratify &lt;- mydat.valid %&gt;%
+  mutate(type = stratifyMatch(fiveUTR, threeUTR, CDS, exon))
+mydat.valid.stratify.bypeak &lt;- mydat.valid.stratify %&gt;%
+  group_by(peak.id) %&gt;%
+  summarise(peak.type = stratifyPeak(type)) %&gt;%
+  ungroup()
+ggplot(mydat.valid.stratify.bypeak) +
+  geom_bar(aes(x = peak.type, y = ..count..)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle(&#39;Number of peak per annotation category&#39;)</code></pre>
+<p><img src="transcript_annotation.metApeakFisher_joint_peaks_18lcls_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 </div>
 
 
